@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load urlify %}
+{% block head_title %}{{ title }} | {{ block.super }}{% endblock head_title %}
+
+
+{% block content %}
+
+<div class="row">
+<div class="col-sm-6 offset-sm-3"> 
+{% if object.image %}
+<img class="img-fluid" src="{{ object.image.url }}">
+{% endif %}
+<h1>{{ object.title }} <small>{% if object.draft %}<span style="color:red"> Draft </span>{% endif %} {{ object.publish }}</small></h1>
+<br>
+
+<a class="btn btn-info" href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}">
+Share on Facebook
+</a> |
+
+<a class="btn btn-success" href="https://twitter.com/home?status={{ object.content|urlify }}{{ request.build_absolute_uri }}">
+Share on Twitter
+</a> |
+
+
+<a class="btn btn-danger" href='https://plus.google.com/share?url={{ request.build_absolute_uri }}'>Google Plus </a>
+
+<hr/>
+
+<div class="post-detail">{{ object.get_markdown|linebreaks }}</div>
+
+{% if request.user.is_authenticated %}
+<hr/>
+<a href="{% url 'post:delete' object.slug %}" class="btn btn-info">Delete</a>
+<a href="{% url 'post:update' object.slug %}" class="btn btn-info">Edit</a>
+{% endif %}
+
+<hr/>
+
+<div class="comments">
+	<p class="lead">Comments:</p>
+	
+	{% if request.user.is_authenticated %}
+	<form method="POST" action="">
+		{% csrf_token %}
+		{{ form.as_p }}
+		<input type="submit" name="Save" class="btn btn-warning">
+	</form>
+	{% else %}
+	<p>You must <a href="{% url 'login' %}">login</a> to comment</p>
+	{% endif %}
+
+	<hr/>
+	{% for comment in comments %}
+	<div class="blockquote">
+	{{ comment.content }}
+	<footer>
+		<small>via {{ comment.user }} | {{ comment.timestamp|timesince }} ago</small>
+		<br>
+		<small>{% if comment.children.count %} {{ comment.children.count }} Comment(s) | {% endif %}
+			<button class='btn btn-success btn-sm reply-btn'>{% if comment.children.count %}See Comments or{% endif %} Reply </button> 
+			{% if delete_stat %}<a href="{% url 'comment:delete' comment.id %}" class="btn btn-danger btn-sm"> Delete</a>{% endif %}
+		</small>
+	</footer>
+		
+		<div class="comment-reply" style="display:none">
+
+		{% for child in comment.children %}
+		<div class="blockquote">
+		{{ child.content }}
+		<footer><small>via {{ child.user }} | {{ child.timestamp|timesince }} ago <br>
+			{% if delete_stat or request.user == child.user %}<a href="{% url 'comment:delete' child.id %}" class="btn btn-danger btn-sm"> Delete</a>{% endif %}</small>
+		</footer>
+		</div>
+		{% endfor %}
+
+		<br>
+
+		{% if request.user.is_authenticated %}
+		<form method="POST" action="">
+		{% csrf_token %}
+		{{ form.as_p }}
+		<input type="hidden" name="parent" value="{{ comment.id }}">
+		<input type="submit" name="Save" class="btn btn-warning">
+		</form>
+		{% else %}
+		<p>You must <a href="{% url 'login' %}">login</a> to reply comment</p>
+		{% endif %}
+
+		</div>
+	</div>
+	<hr/>
+	{% endfor %}
+
+</div>
+</div>
+
+</div>
+{% endblock content %}

@@ -1,0 +1,97 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{% block head_title %} Post {% endblock head_title %}</title>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+	
+	<link rel="stylesheet" href="{% static 'css/base.css' %}">
+	
+	{% block head_extra %} {% endblock head_extra %}
+
+	<style>
+		{% block style %}
+		{% endblock style %}
+	</style>
+	
+</head>
+
+<body>	
+<div class="container">
+	{% include 'nav.html' %}
+	{% include 'messages.html' %}
+	{% block content %}
+
+	{% endblock content %}
+	
+</div>
+	
+
+	
+
+
+	<script
+  src="http://code.jquery.com/jquery-1.12.2.min.js"
+  integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk="
+  crossorigin="anonymous"></script>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>	
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
+	
+
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$(".content-markdown").each(function(){
+				var content = $(this).text();
+				var markedcontent = marked(content);
+				$(this).html(markedcontent);
+			});
+
+			$(".post-detail img").each(function(){
+				$(this).addClass("img-fluid");
+			});
+
+			var title = $("#id_title").val();
+			var content = $("#id_content").val();
+		
+
+			function setContent(value){
+				var content = value
+				$("#preview-content").html(marked(content));
+				$("#preview-content img").each(function(){
+					$(this).addClass("img-fluid");
+				});
+			}
+
+			setContent(content);
+
+			$("#id_content").keyup(function(){
+				content = $(this).val()
+				setContent(content);
+			});
+
+			function setTitle(value){
+				var title = value
+				$("#preview-title").text(title);
+			}
+
+			setTitle(title);
+
+			$("#id_title").keyup(function(){
+				title = $(this).val();
+				setTitle(title);
+			});
+
+			
+			$(".reply-btn").click(function(event){
+				event.preventDefault();
+				$(this).parent().parent().next('.comment-reply').fadeToggle();
+			});		
+		});
+	</script>
+</body>
+</html>
